@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeCatch — Learn by Playing</title>
+  <meta name="description" content="A minimalist game where you learn coding concepts by playing. Catch falling balls, toggle physics features, edit live code values.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── HEADER ──────────────────────────────── -->
+  <header>
+
+    <div class="logo">Code<span>Catch</span></div>
+
+    <div class="h-sep"></div>
+
+    <!-- XP progress -->
+    <div class="xp-wrap">
+      <span class="xp-label">XP</span>
+      <div class="xp-track">
+        <div class="xp-fill" id="xp-bar"></div>
+      </div>
+      <span class="xp-val" id="xp-txt">0 / 100</span>
+    </div>
+
+    <!-- Level -->
+    <div class="lvl-badge">
+      <span class="lvl-sub">LVL</span>
+      <span class="lvl-num" id="hdr-level">1</span>
+    </div>
+
+    <div class="h-sep"></div>
+
+    <!-- Scores -->
+    <div class="scores">
+      <div class="sc">
+        <span class="sc-label">Caught</span>
+        <span class="sc-val g" id="sc-caught">0</span>
+      </div>
+      <div class="sc">
+        <span class="sc-label">Streak</span>
+        <span class="sc-val y" id="sc-streak">0</span>
+      </div>
+      <div class="sc">
+        <span class="sc-label">Missed</span>
+        <span class="sc-val r" id="sc-missed">0</span>
+      </div>
+    </div>
+
+    <!-- Start button -->
+    <button id="btn-start">▶ Start</button>
+
+  </header>
+
+  <!-- ── GAME PANEL ──────────────────────────── -->
+  <div id="game-panel">
+
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Achievement toast -->
+    <div class="toast" id="toast">
+      <span class="toast-icon" id="toast-icon">🏆</span>
+      <div class="toast-body">
+        <div class="toast-sup">Achievement Unlocked</div>
+        <div class="toast-name" id="toast-name">—</div>
+      </div>
+    </div>
+
+    <!-- Start overlay -->
+    <div class="overlay" id="overlay">
+      <div class="ov-title">CodeCatch</div>
+      <div class="ov-sub">learn coding concepts by playing a game</div>
+      <div class="ov-hint">🖱 Move your mouse to control the bucket</div>
+      <div class="ov-hint ac">Click code blocks → plain-English explanations</div>
+      <div class="ov-hint tn">📝 Edit orange numbers to change the physics</div>
+      <div class="ov-hint ye">🏆 Catch balls to unlock features &amp; earn XP</div>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT PANEL ─────────────────────────── -->
+  <div id="right-panel">
+
+    <!-- Feature Toggles -->
+    <div id="toggles">
+      <div class="section-label">Feature Toggles</div>
+      <div id="toggle-grid">
+        <!-- Built by ui.js -->
+      </div>
+    </div>
+
+    <!-- Live Code Panel -->
+    <div id="code-panel">
+      <div class="code-panel-label">
+        Live Code — click to explain · <span class="tn">edit orange numbers</span>
+      </div>
+      <!-- Code blocks built by ui.js -->
+    </div>
+
+    <!-- Explanation Panel -->
+    <div id="explain-panel">
+      <div id="ex-prompt">
+        <span class="ep-icon">💡</span>
+        <span class="ep-text">Click any code block above<br>for a plain-English explanation</span>
+      </div>
+      <div id="ex-content"></div>
+    </div>
+
+  </div>
+
+  <!-- ── CODE MODAL ─────────────────────────── -->
+  <div id="code-modal">
+    <div id="modal-backdrop"></div>
+    <div class="modal-box">
+
+      <div class="modal-titlebar">
+        <div class="modal-dots">
+          <i></i><i></i><i></i>
+        </div>
+        <span class="modal-fname" id="modal-fname">—</span>
+        <button id="modal-close-btn">✕ Close</button>
+      </div>
+
+      <div class="modal-concept-bar">
+        <span id="modal-concept">—</span>
+        <span id="modal-ctitle">—</span>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-code-pane">
+          <pre id="modal-code"></pre>
+        </div>
+        <div class="modal-explain-pane" id="modal-explain"></div>
+      </div>
+
+      <div class="modal-footer">
+        💡 <span>Orange values</span> in the code panel are editable — try tweaking them while the game runs!
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── SCRIPTS (order matters) ─────────────── -->
+  <script src="js/config.js"></script>
+  <script src="js/physics.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/content.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+</html>
