@@ -1,93 +1,79 @@
-/**
- * main.js
- * Entry point. Wires Game, Renderer, UI together.
- * No game logic here — only initialization and event wiring.
- */
+// main.js — entry point.
+// Runs after all other scripts are loaded.
+// Sets up canvas, wires events, starts idle animation.
 
-(function main() {
+document.addEventListener('DOMContentLoaded', function() {
 
-  const canvas = document.getElementById('game-canvas');
-  const panel  = document.getElementById('game-panel');
-
-  /* ── Canvas resize ──────────────────────────── */
+  // ── Canvas setup ────────────────────────────
+  canvas = document.getElementById('game-canvas');
+  ctx    = canvas.getContext('2d');
+  gp     = document.getElementById('gp');
 
   function resize() {
-    canvas.width  = panel.clientWidth;
-    canvas.height = panel.clientHeight;
+    canvas.width  = gp.clientWidth;
+    canvas.height = gp.clientHeight;
+    if (!S.bucketX) S.bucketX = canvas.width / 2;
   }
   resize();
-  new ResizeObserver(resize).observe(panel);
+  new ResizeObserver(resize).observe(gp);
 
-  /* ── Initialise modules ─────────────────────── */
-
-  Renderer.init(canvas);
-
-  UI.buildToggles(featureId => {
-    Game.toggleFeature(featureId);
+  // ── Bucket mouse / touch control ────────────
+  gp.addEventListener('mousemove', function(e) {
+    var r = canvas.getBoundingClientRect();
+    S.bucketX = (e.clientX - r.left) * (canvas.width / r.width);
   });
+  gp.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    var r = canvas.getBoundingClientRect();
+    S.bucketX = (e.touches[0].clientX - r.left) * (canvas.width / r.width);
+  }, { passive: false });
 
-  UI.buildCodePanel();
+  // ── Build UI ─────────────────────────────────
+  buildToggles();
+  buildCodePanel();
 
-  Game.init(canvas, {
-    onScoreChange:  state => UI.updateScore(state),
-    onAchievement:  a     => UI.showAchievement(a),
-    onStreakShow:   (count, x, y) => UI.showStreak(count, x, y),
-  });
-
-  /* ── Unlock events ──────────────────────────── */
-
-  document.addEventListener('feature-unlock', e => {
-    UI.unlockFeature(e.detail);
-  });
-
-  document.addEventListener('flash-red', () => UI.flashRed());
-
-  /* ── Achievement re-check on edit ──────────── */
-
-  document.addEventListener('check-ach', () => {
-    // trigger the game's internal ach check via a dummy update
-    const state = Game.getState();
-    ACHIEVEMENTS.forEach(a => {
-      if (!Game._achSet.has(a.id) && a.cond(state)) {
-        Game._achSet.add(a.id);
-        UI.showAchievement(a);
-      }
-    });
-  });
-
-  /* ── Start / Stop button ────────────────────── */
-
-  const btn = document.getElementById('btn-start');
-
-  btn.addEventListener('click', () => {
-    const state = Game.getState();
-    if (!state.running) {
-      Game.start();
-      UI.showOverlay(false);
+  // ── Start / Stop button ──────────────────────
+  var btn = document.getElementById('btn');
+  btn.addEventListener('click', function() {
+    if (!S.running) {
+      // Start
+      S.running = true;
+      S.balls   = [];
+      S.frame   = 0;
+      document.getElementById('ov').classList.add('gone');
       btn.textContent = '⏹ Stop';
       btn.classList.add('stop');
+      gameLoop();
     } else {
-      Game.stop();
-      UI.showOverlay(true);
+      // Stop
+      S.running = false;
+      cancelAnimationFrame(animId);
+      document.getElementById('ov').classList.remove('gone');
       btn.textContent = '▶ Start';
       btn.classList.remove('stop');
+      // Restart idle animation
+      idleLoop();
     }
   });
 
-  /* ── Modal close ────────────────────────────── */
+  // ── Modal close ──────────────────────────────
+  document.getElementById('modal-bd').addEventListener('click', closeModal);
+  document.getElementById('m-close').addEventListener('click',  closeModal);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeModal();
+  });
 
-  document.getElementById('modal-backdrop').addEventListener('click', () => UI.closeModal());
-  document.getElementById('modal-close-btn').addEventListener('click', () => UI.closeModal());
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') UI.closeModal(); });
-
-  /* ── Idle animation loop ────────────────────── */
-
-  function idleLoop() {
-    if (!Game.getState().running) {
-      Renderer.drawIdle();
-    }
-    requestAnimationFrame(idleLoop);
-  }
+  // ── Start idle animation ─────────────────────
   idleLoop();
 
-})();
+});
+
+// ── Game loop ────────────────────────────────
+function gameLoop() {
+  if (!S.running) return;
+  S.frame++;
+  if (S.frame % spawnIval() === 0) spawnBalls();
+  drawFrame();
+  update();
+  animId = requestAnimationFrame(gameLoop);
+}
